@@ -62,8 +62,31 @@ CREATE DATABASE smart_lock;
 
   npm install -g db-migrate-pg
   ```
+#
+## Scenario to test
 
-### Examples for GraphQL inputs
+```
+npm install
+```
+- create database in postgreSQL with the name smart_lock
+   
+```
+CREATE DATABASE smart_lock;
+```
+- move .env.example variables to .env 
+```
+npm start
+```
+- use the url http://localhost:3000/graphql
+
+- use the below tests for graphQL 
+  - createUnit
+  - createLock
+  - createReservation
+  - cancel reservation 
+
+#
+## Examples for GraphQL inputs
 
 ## Unit
 
