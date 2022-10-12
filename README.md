@@ -161,7 +161,7 @@ mutation updateReservation{
 }
 
 mutation cancelReservation{
-  cancelReservation(unit_id:2 ,guest_name:"Abdo",id:1, check_in:"2020-09-23T17:01:00.000Z",check_out: "2021-09-23T17:01:00.000Z" ){
+  cancelReservation(unit_id:1 ,guest_name:"Abdo",id:1, check_in:"2020-09-23T17:01:00.000Z",check_out: "2021-09-23T17:01:00.000Z" ){
    	    id,
     unit_id,
     guest_name,
