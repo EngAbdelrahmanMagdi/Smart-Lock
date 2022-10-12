@@ -36,15 +36,21 @@ npm run db:down
 #
 ## Database Configuration 
 - Default port  ``5432``
-#
-- ### Create 2 Databases 
+
+
+- ### Create  Database
 ```
 CREATE DATABASE smart_lock;
 ```
 
 
 - Configure .env to fit your environment (look at .env.example).
-
+#
+  ## Project Structure 
+  - index.js => for express server
+  - Functions directory => for generate token, refresh token, generate passcode and delete passcode (TUYA Integration)
+  - Schemas => for GraphQL 
+  - Lib => prepare Tuya for usage
 #
  ### If you faced problems in scripts running, Please make sure you've some packages globally installed in your Machine 
 
@@ -83,14 +89,14 @@ query getOneUnit{
 }
 
 mutation deleteUnit{
-  deleteUnit(id:7){
+  deleteUnit(id:1){
 		id,
     unit_name
   }
 }
 
 mutation updateUnit{
-  updateUnit(unit_name:"five",id:5){
+  updateUnit(unit_name:"five",id:1){
     id,
 		unit_name
 
@@ -104,7 +110,7 @@ mutation updateUnit{
 
 ```
 mutation createReservation{
-	addReservation(unit_id:3, guest_name:"Abdelrahman",check_in:"2020-09-23T17:01:00Z",check_out:"2021-09-23T17:01:00Z", lock_id:1){
+	addReservation(unit_id:1, guest_name:"Abdelrahman",check_in:"2020-09-23T17:01:00Z",check_out:"2021-09-23T17:01:00Z", lock_id:1){
     id,
     unit_id,
     guest_name,
@@ -124,7 +130,7 @@ query getAllReservations{
 }
 
 query getReservation{
-  reservation(id:7){
+  reservation(id:1){
     id,
     unit_id,
     guest_name,
@@ -134,7 +140,7 @@ query getReservation{
 }
 
 mutation deleteReservation{
-  deleteReservation(id:28){
+  deleteReservation(id:1){
 	    id,
     unit_id,
     guest_name,
@@ -144,7 +150,7 @@ mutation deleteReservation{
 }
 
 mutation updateReservation{
-  updateReservation(unit_id:2 ,guest_name:"Ali",id:7, check_in:"2020-09-23T17:01:00.000Z",check_out: "2021-09-23T17:01:00.000Z", is_cancelled:false, lock_id:1 ){
+  updateReservation(unit_id:1 ,guest_name:"Ali",id:1, check_in:"2020-09-23T17:01:00.000Z",check_out: "2021-09-23T17:01:00.000Z", is_cancelled:false, lock_id:1 ){
    	    id,
     unit_id,
     guest_name,
@@ -155,7 +161,7 @@ mutation updateReservation{
 }
 
 mutation cancelReservation{
-  cancelReservation(unit_id:2 ,guest_name:"Abdo",id:26, check_in:"2020-09-23T17:01:00.000Z",check_out: "2021-09-23T17:01:00.000Z" ){
+  cancelReservation(unit_id:2 ,guest_name:"Abdo",id:1, check_in:"2020-09-23T17:01:00.000Z",check_out: "2021-09-23T17:01:00.000Z" ){
    	    id,
     unit_id,
     guest_name,
@@ -172,7 +178,7 @@ mutation cancelReservation{
 
 ```
 mutation createLock{
-	addLock(unit_id:3, device_id:"768s7dsdfdf56"){
+	addLock(unit_id:1){
     id,
     unit_id,
     device_id
@@ -188,7 +194,7 @@ query getAllLocks{
 }
 
 query getOneLock{
-  lock(id:10){
+  lock(id:1){
     id,
     unit_id,
     device_id
@@ -196,7 +202,7 @@ query getOneLock{
 }
 
 mutation deleteLock{
-  deleteLock(id:8){
+  deleteLock(id:1){
       id,
     unit_id,
     device_id
@@ -204,7 +210,7 @@ mutation deleteLock{
 }
 
 mutation updateLock{
-  updateLock(unit_id:4 , device_id:"768sddsdfdf56", id:10){
+  updateLock(unit_id:1 , device_id:"768sddsdfdf56", id:1){
       id,
     unit_id,
     device_id
@@ -219,7 +225,7 @@ mutation updateLock{
 
 ```
 mutation createAccessCode{
-	addAccessCode(lock_id:11, reservation_id:2){
+	addAccessCode(lock_id:1, reservation_id:1){
     id,
     lock_id,
     reservation_id,
@@ -239,7 +245,7 @@ query getAllAccessCodes{
 }
 
 query GetOneAccessCode{
-  accessCode(id:5){
+  accessCode(id:1){
      id,
     lock_id,
     reservation_id,
@@ -249,7 +255,7 @@ query GetOneAccessCode{
 }
 
 mutation deleteOneAccessCode{
-  deleteAccessCode(id:6){
+  deleteAccessCode(id:1){
      id,
     lock_id,
     reservation_id,
@@ -259,8 +265,7 @@ mutation deleteOneAccessCode{
 }
 
 mutation updateAccessCode{
-  updateAccessCode(id:5,lock_id:11, reservation_id:9){
-       id,
+  updateAccessCode(id:1,lock_id:1, reservation_id:1){
     lock_id,
     reservation_id,
     passcode,

@@ -16,6 +16,7 @@ module.exports = function () {
             post_ticket: "/v1.0/devices/{device_id}/door-lock/password-ticket",
             delete_passCode:
               "/v1.0/devices/{device_id}/door-lock/temp-passwords/{password_id}",
+              get_allPass: "/v1.0/devices/{device_id}/door-lock/temp-passwords"
           };
         }
 
