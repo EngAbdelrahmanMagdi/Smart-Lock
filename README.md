@@ -104,7 +104,7 @@ mutation updateUnit{
 
 ```
 mutation createReservation{
-	addReservation(unit_id:3, guest_name:"Abdelrahman",check_in:"2020-09-23T17:01:00Z",check_out:"2021-09-23T17:01:00Z"){
+	addReservation(unit_id:3, guest_name:"Abdelrahman",check_in:"2020-09-23T17:01:00Z",check_out:"2021-09-23T17:01:00Z", lock_id:1){
     id,
     unit_id,
     guest_name,
@@ -134,7 +134,7 @@ query getReservation{
 }
 
 mutation deleteReservation{
-  deleteReservation(id:11){
+  deleteReservation(id:28){
 	    id,
     unit_id,
     guest_name,
@@ -144,7 +144,18 @@ mutation deleteReservation{
 }
 
 mutation updateReservation{
-  updateReservation(unit_id:2 ,guest_name:"Abdo",id:10, check_in:"2020-09-23T17:01:00.000Z",check_out: "2021-09-23T17:01:00.000Z", is_cancelled:true ){
+  updateReservation(unit_id:2 ,guest_name:"Ali",id:7, check_in:"2020-09-23T17:01:00.000Z",check_out: "2021-09-23T17:01:00.000Z", is_cancelled:false, lock_id:1 ){
+   	    id,
+    unit_id,
+    guest_name,
+    check_in,
+    check_out
+
+  }
+}
+
+mutation cancelReservation{
+  cancelReservation(unit_id:2 ,guest_name:"Abdo",id:26, check_in:"2020-09-23T17:01:00.000Z",check_out: "2021-09-23T17:01:00.000Z" ){
    	    id,
     unit_id,
     guest_name,
@@ -161,11 +172,10 @@ mutation updateReservation{
 
 ```
 mutation createLock{
-	addLock(unit_id:3, device_id:"768s7dsdfdf56",remote_lock_id:"77d4df9sfdsdsf"){
+	addLock(unit_id:3, device_id:"768s7dsdfdf56"){
     id,
     unit_id,
-    device_id,
-    remote_lock_id
+    device_id
   }
 }
 
@@ -173,8 +183,7 @@ query getAllLocks{
   locks{
     id,
     unit_id,
-    device_id,
-    remote_lock_id
+    device_id
   }
 }
 
@@ -182,8 +191,7 @@ query getOneLock{
   lock(id:10){
     id,
     unit_id,
-    device_id,
-    remote_lock_id
+    device_id
   }
 }
 
@@ -191,17 +199,15 @@ mutation deleteLock{
   deleteLock(id:8){
       id,
     unit_id,
-    device_id,
-    remote_lock_id
+    device_id
   }
 }
 
 mutation updateLock{
-  updateLock(unit_id:4 , device_id:"768sddsdfdf56",remote_lock_id: "77d4dfdsfdsdsf", id:10){
+  updateLock(unit_id:4 , device_id:"768sddsdfdf56", id:10){
       id,
     unit_id,
-    device_id,
-    remote_lock_id
+    device_id
 
   }
 }
@@ -213,14 +219,12 @@ mutation updateLock{
 
 ```
 mutation createAccessCode{
-	addAccessCode(lock_id:11, reservation_id:2, passcode:"2t234567",remote_passcode_id:"t9d4df9sfdsdsf", access_code:"r6dsdads", access_code_id:"rf56dsd6s"){
+	addAccessCode(lock_id:11, reservation_id:2){
     id,
     lock_id,
     reservation_id,
     passcode,
-    remote_passcode_id,
-    access_code,
-    access_code_id
+    remote_passcode_id
   }
 }
 
@@ -230,9 +234,7 @@ query getAllAccessCodes{
     lock_id,
     reservation_id,
     passcode,
-    remote_passcode_id,
-    access_code,
-    access_code_id
+    remote_passcode_id
   }
 }
 
@@ -242,9 +244,7 @@ query GetOneAccessCode{
     lock_id,
     reservation_id,
     passcode,
-    remote_passcode_id,
-    access_code,
-    access_code_id
+    remote_passcode_id
   }
 }
 
@@ -254,21 +254,17 @@ mutation deleteOneAccessCode{
     lock_id,
     reservation_id,
     passcode,
-    remote_passcode_id,
-    access_code,
-    access_code_id
+    remote_passcode_id
   }
 }
 
 mutation updateAccessCode{
-  updateAccessCode(id:5,lock_id:11, reservation_id:9, passcode:"2t234567",remote_passcode_id:"t9d4df9sfdsdsf", access_code:"r6dsdads", access_code_id:"rf56dsd6s"){
+  updateAccessCode(id:5,lock_id:11, reservation_id:9){
        id,
     lock_id,
     reservation_id,
     passcode,
-    remote_passcode_id,
-    access_code,
-    access_code_id
+    remote_passcode_id
 
   }
 }

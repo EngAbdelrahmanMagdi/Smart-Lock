@@ -21,7 +21,17 @@ const {
   GraphQLBoolean,
 } = require("graphql");
 
+const { accessCode, passcode } = require("./../functions/passcode");
 const { GraphQLDateTime } = require("graphql-iso-date");
+
+require("dotenv").config();
+const { DEVICE_ID } = process.env;
+var device = DEVICE_ID;
+var remote_passcode_id = "";
+
+(async function () {
+  remote_passcode_id = await accessCode();
+})();
 
 const Mutation = new GraphQLObjectType({
   name: "Mutation",
@@ -74,6 +84,10 @@ const Mutation = new GraphQLObjectType({
         guest_name: { type: new GraphQLNonNull(GraphQLString) },
         check_in: { type: new GraphQLNonNull(GraphQLDateTime) },
         check_out: { type: new GraphQLNonNull(GraphQLDateTime) },
+        lock_id: {
+          type: new GraphQLNonNull(GraphQLID),
+          resolve: (accessCode) => getLock(accessCode.id),
+        },
       },
       resolve: async (parent, args) => {
         try {
@@ -81,7 +95,16 @@ const Mutation = new GraphQLObjectType({
             "INSERT INTO reservations (unit_id, guest_name, check_in, check_out) VALUES($1,$2,$3,$4) RETURNING *",
             [args.unit_id, args.guest_name, args.check_in, args.check_out]
           );
-          return newReservation.rows[0];
+          const reservationID = await Database.query(
+            "SELECT id FROM reservations ORDER BY reservations.id DESC LIMIT 1"
+          );
+          const test = {...reservationID}; 
+          const IdOfReservation = test.rows[0].id;
+          const newAccessCode = await Database.query(
+            "INSERT INTO access_code (lock_id, reservation_id, passcode, remote_passcode_id) VALUES($1,$2,$3,$4) RETURNING *",
+            [args.lock_id, IdOfReservation, passcode, remote_passcode_id]
+          );
+          return newAccessCode.rows[0];
         } catch (error) {
           return error;
         }
@@ -102,6 +125,10 @@ const Mutation = new GraphQLObjectType({
             "DELETE FROM reservations WHERE id=$1",
             [args.id]
           );
+          const deletedAccessKey = await Database.query(
+            "DELETE FROM access_code WHERE access_code.reservation_id=$1",
+            [args.id]
+          );
           // console.log(todo.rows[0])
           return todo.rows[0];
         } catch (error) {
@@ -116,14 +143,12 @@ const Mutation = new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLID),
           resolve: (lock) => getUnitInLocks(lock.id),
         },
-        device_id: { type: new GraphQLNonNull(GraphQLString) },
-        remote_lock_id: { type: new GraphQLNonNull(GraphQLString) },
       },
       resolve: async (parent, args) => {
         try {
           const newReservation = await Database.query(
-            "INSERT INTO locks (unit_id, device_id, remote_lock_id) VALUES($1,$2,$3) RETURNING *",
-            [args.unit_id, args.device_id, args.remote_lock_id]
+            "INSERT INTO locks (unit_id, device_id) VALUES($1,$2) RETURNING *",
+            [args.unit_id, device]
           );
           return newReservation.rows[0];
         } catch (error) {
@@ -164,23 +189,12 @@ const Mutation = new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLID),
           resolve: (accessCode) => getReservation(accessCode.id),
         },
-        access_code: { type: new GraphQLNonNull(GraphQLString) },
-        passcode: { type: new GraphQLNonNull(GraphQLString) },
-        access_code_id: { type: new GraphQLNonNull(GraphQLString) },
-        remote_passcode_id: { type: new GraphQLNonNull(GraphQLString) },
       },
       resolve: async (parent, args) => {
         try {
           const newAccessCode = await Database.query(
-            "INSERT INTO access_code (lock_id, reservation_id, access_code, passcode,access_code_id, remote_passcode_id) VALUES($1,$2,$3,$4,$5,$6) RETURNING *",
-            [
-              args.lock_id,
-              args.reservation_id,
-              args.access_code,
-              args.passcode,
-              args.access_code_id,
-              args.remote_passcode_id,
-            ]
+            "INSERT INTO access_code (lock_id, reservation_id, passcode, remote_passcode_id) VALUES($1,$2,$3,$4) RETURNING *",
+            [args.lock_id, args.reservation_id, passcode, remote_passcode_id]
           );
           return newAccessCode.rows[0];
         } catch (error) {
@@ -243,6 +257,10 @@ const Mutation = new GraphQLObjectType({
         check_in: { type: new GraphQLNonNull(GraphQLDateTime) },
         check_out: { type: new GraphQLNonNull(GraphQLDateTime) },
         is_cancelled: { type: new GraphQLNonNull(GraphQLBoolean) },
+        lock_id: {
+          type: new GraphQLNonNull(GraphQLID),
+          resolve: (accessCode) => getLock(accessCode.id),
+        },
       },
       resolve: async (parent, args) => {
         try {
@@ -256,6 +274,51 @@ const Mutation = new GraphQLObjectType({
               args.is_cancelled,
               args.id,
             ]
+          );
+          const deletedAccessKey = await Database.query(
+            "DELETE FROM access_code WHERE access_code.reservation_id=$1",
+            [args.id]
+          );
+          const newAccessCode = await Database.query(
+            "INSERT INTO access_code (lock_id, reservation_id, passcode, remote_passcode_id) VALUES($1,$2,$3,$4) RETURNING *",
+            [args.lock_id, args.id, passcode, remote_passcode_id]
+          );
+          console.log(updatedReservation);
+          return updatedReservation.rows[0];
+        } catch (error) {
+          return error.message;
+        }
+      },
+    },
+
+    cancelReservation: {
+      type: ReservationType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        unit_id: {
+          type: new GraphQLNonNull(GraphQLID),
+          resolve: (reservation) => getUnit(reservation.id),
+        },
+        guest_name: { type: new GraphQLNonNull(GraphQLString) },
+        check_in: { type: new GraphQLNonNull(GraphQLDateTime) },
+        check_out: { type: new GraphQLNonNull(GraphQLDateTime) },
+      },
+      resolve: async (parent, args) => {
+        try {
+          const updatedReservation = await Database.query(
+            "UPDATE reservations SET unit_id=$1, guest_name=$2, check_in=$3, check_out=$4, is_cancelled=$5 WHERE id=$6 RETURNING *",
+            [
+              args.unit_id,
+              args.guest_name,
+              args.check_in,
+              args.check_out,
+              true,
+              args.id,
+            ]
+          );
+          const deletedAccessKey = await Database.query(
+            "DELETE FROM access_code WHERE access_code.reservation_id=$1",
+            [args.id]
           );
           console.log(updatedReservation);
           return updatedReservation.rows[0];
@@ -274,13 +337,12 @@ const Mutation = new GraphQLObjectType({
           resolve: (lock) => getUnitInLocks(lock.id),
         },
         device_id: { type: new GraphQLNonNull(GraphQLString) },
-        remote_lock_id: { type: new GraphQLNonNull(GraphQLString) },
       },
       resolve: async (parent, args) => {
         try {
           const updatedLocks = await Database.query(
-            "UPDATE locks SET unit_id=$1, device_id=$2, remote_lock_id=$3 WHERE id=$4 RETURNING *",
-            [args.unit_id, args.device_id, args.remote_lock_id, args.id]
+            "UPDATE locks SET unit_id=$1, device_id=$2 WHERE id=$3 RETURNING *",
+            [args.unit_id, args.device_id, args.id]
           );
           console.log(updatedLocks);
           return updatedLocks.rows[0];
@@ -302,22 +364,16 @@ const Mutation = new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLID),
           resolve: (accessCode) => getReservation(accessCode.id),
         },
-        access_code: { type: new GraphQLNonNull(GraphQLString) },
-        passcode: { type: new GraphQLNonNull(GraphQLString) },
-        access_code_id: { type: new GraphQLNonNull(GraphQLString) },
-        remote_passcode_id: { type: new GraphQLNonNull(GraphQLString) },
       },
       resolve: async (parent, args) => {
         try {
           const updateAccessCode = await Database.query(
-            "UPDATE access_code SET lock_id=$1, reservation_id=$2, access_code=$3, passcode=$4, access_code_id=$5, remote_passcode_id=$6 WHERE id=$7 RETURNING *",
+            "UPDATE access_code SET lock_id=$1, reservation_id=$2, passcode=$3, remote_passcode_id=$4 WHERE id=$5 RETURNING *",
             [
               args.lock_id,
               args.reservation_id,
-              args.access_code,
-              args.passcode,
-              args.access_code_id,
-              args.remote_passcode_id,
+              passcode,
+              remote_passcode_id,
               args.id,
             ]
           );
